@@ -5,7 +5,6 @@ import lambda.data.Person;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -19,7 +18,9 @@ class Exercise3 {
     void sortPersonsByAgeUsingArraysSortExpressionLambda() {
         Person[] persons = getPersons();
 
-        Arrays.sort(persons, Comparator.comparingInt(Person::getAge));
+        Arrays.sort(persons, (p1,p2) -> {
+            return p1.getAge() - p2.getAge();
+        });
 
         assertThat(persons, is(arrayContaining(
                 new Person("Иван", "Мельников", 20),
@@ -33,9 +34,9 @@ class Exercise3 {
     void sortPersonsByLastNameThenFirstNameUsingArraysSortExpressionLambda() {
         Person[] persons = getPersons();
 
-        Arrays.sort(persons, (a,b) -> {
-
-        });
+        Arrays.sort(persons, (a,b) -> a.getLastName().compareTo(b.getLastName())!= 0?
+                a.getLastName().compareTo(b.getLastName()):
+                a.getFirstName().compareTo(b.getFirstName()));
 
         assertThat(persons, is(arrayContaining(
                 new Person("Алексей", "Доренко", 40),
