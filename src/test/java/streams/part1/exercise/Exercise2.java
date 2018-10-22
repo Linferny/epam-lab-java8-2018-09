@@ -19,7 +19,10 @@ class Exercise2 {
     void calcAverageAgeOfEmployees() {
         List<Employee> employees = getEmployees();
 
-        Double expected = null;
+        Double expected = employees.stream()
+                .map(Employee::getPerson)
+                .map(Person::getAge)
+                .min
 
         assertThat(expected, Matchers.closeTo(33.66, 0.1));
     }
