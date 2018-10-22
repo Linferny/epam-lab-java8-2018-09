@@ -5,10 +5,8 @@ import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -23,7 +21,11 @@ class Exercise1 {
         List<Employee> employees = getEmployees();
 
         // TODO реализация, использовать Collectors.toList()
-        List<Person> personsEverWorkedInEpam = null;
+        List<Person> personsEverWorkedInEpam = employees.stream()
+                .filter(emp -> emp.getJobHistory().stream()
+                        .anyMatch(job -> job.getEmployer().equals("EPAM")))
+                .map(Employee::getPerson)
+                .collect(Collectors.toList());
 
         assertThat(personsEverWorkedInEpam, contains(
                 employees.get(0).getPerson(),
@@ -38,7 +40,11 @@ class Exercise1 {
         List<Employee> employees = getEmployees();
 
         // TODO реализация, использовать Collectors.toList()
-        List<Person> startedFromEpam = null;
+        List<Person> startedFromEpam = employees.stream()
+                .filter(emp -> emp.getJobHistory().stream()
+                        .findFirst().orElse(new JobHistoryEntry(1, "", "")).getEmployer().equals("EPAM"))
+                .map(Employee::getPerson)
+                .collect(Collectors.toList());
 
         assertThat(startedFromEpam, contains(
                 employees.get(0).getPerson(),
@@ -52,7 +58,11 @@ class Exercise1 {
         List<Employee> employees = getEmployees();
 
         // TODO реализация, использовать Collectors.toSet()
-        Set<String> companies = null;
+        Set<String> companies = employees.stream()
+                .map(Employee::getJobHistory)
+                .flatMap(Collection::stream)
+                .map(JobHistoryEntry::getEmployer)
+                .collect(Collectors.toSet());
 
         assertThat(companies, containsInAnyOrder("EPAM", "google", "yandex", "mail.ru", "T-Systems"));
     }
@@ -62,7 +72,11 @@ class Exercise1 {
         List<Employee> employees = getEmployees();
 
         // TODO реализация
-        Integer minimalAge = null;
+        Integer minimalAge = employees.stream()
+                .map(Employee::getPerson)
+                .map(Person::getAge)
+                .reduce(Math::min)
+                .orElse(-1);
 
         assertThat(minimalAge, is(21));
     }
