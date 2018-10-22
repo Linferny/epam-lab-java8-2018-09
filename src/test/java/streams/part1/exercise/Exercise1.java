@@ -75,7 +75,7 @@ class Exercise1 {
         Integer minimalAge = employees.stream()
                 .map(Employee::getPerson)
                 .map(Person::getAge)
-                .reduce(Math::min)
+                .min(Integer::compareTo)
                 .orElse(-1);
 
         assertThat(minimalAge, is(21));
