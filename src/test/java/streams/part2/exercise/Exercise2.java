@@ -5,11 +5,8 @@ import lambda.data.JobHistoryEntry;
 import lambda.data.Person;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -21,62 +18,133 @@ import static org.hamcrest.Matchers.is;
 class Exercise2 {
 
     /**
-     * Преобразовать список сотрудников в отображение [компания -> множество людей, когда-либо работавших в этой компании].
-     *
+     * Преобразовать список сотрудников в отображение [компания -> множество людей, начавших свою карьеру в этой компании].
+     * <p>
+     * Пример.
+     * <p>
      * Входные данные:
      * [
-     *     {
-     *         {Иван Мельников 30},
-     *         [
-     *             {2, dev, "EPAM"},
-     *             {1, dev, "google"}
-     *         ]
-     *     },
-     *     {
-     *         {Александр Дементьев 28},
-     *         [
-     *             {2, tester, "EPAM"},
-     *             {1, dev, "EPAM"},
-     *             {1, dev, "google"}
-     *         ]
-     *     },
-     *     {
-     *         {Дмитрий Осинов 40},
-     *         [
-     *             {3, QA, "yandex"},
-     *             {1, QA, "EPAM"},
-     *             {1, dev, "mail.ru"}
-     *         ]
-     *     },
-     *     {
-     *         {Анна Светличная 21},
-     *         [
-     *             {1, tester, "T-Systems"}
-     *         ]
-     *     }
+     * {
+     * {Иван Мельников 30},
+     * [
+     * {2, dev, "EPAM"},
+     * {1, dev, "google"}
      * ]
-     *
+     * },
+     * {
+     * {Александр Дементьев 28},
+     * [
+     * {2, tester, "EPAM"},
+     * {1, dev, "EPAM"},
+     * {1, dev, "google"}
+     * ]
+     * },
+     * {
+     * {Дмитрий Осинов 40},
+     * [
+     * {3, QA, "yandex"},
+     * {1, QA, "EPAM"},
+     * {1, dev, "mail.ru"}
+     * ]
+     * },
+     * {
+     * {Анна Светличная 21},
+     * [
+     * {1, tester, "T-Systems"}
+     * ]
+     * }
+     * ]
+     * <p>
      * Выходные данные:
      * [
-     *    "EPAM" -> [
-     *       {Иван Мельников 30},
-     *       {Александр Дементьев 28},
-     *       {Дмитрий Осинов 40}
-     *    ],
-     *    "google" -> [
-     *       {Иван Мельников 30},
-     *       {Александр Дементьев 28}
-     *    ],
-     *    "yandex" -> [ {Дмитрий Осинов 40} ]
-     *    "mail.ru" -> [ {Дмитрий Осинов 40} ]
-     *    "T-Systems" -> [ {Анна Светличная 21} ]
+     * "EPAM" -> [
+     * {Иван Мельников 30},
+     * {Александр Дементьев 28}
+     * ],
+     * "yandex" -> [ {Дмитрий Осинов 40} ]
+     * "T-Systems" -> [ {Анна Светличная 21} ]
+     * ]
+     */
+    @Test
+    void indexByFirstEmployer() {
+        List<Employee> employees = getEmployees();
+
+        Map<String, Set<Person>> result = employees.stream()
+                .collect(Collectors.groupingBy(emp -> emp.getJobHistory().get(0).getEmployer(), Collectors.mapping(Employee::getPerson, Collectors.toSet())));
+
+        assertThat(result, hasEntry(is("yandex"), contains(employees.get(2).getPerson())));
+        assertThat(result, hasEntry(is("T-Systems"), containsInAnyOrder(employees.get(3).getPerson(), employees.get(5).getPerson())));
+        assertThat(result, hasEntry(is("EPAM"), containsInAnyOrder(
+                employees.get(0).getPerson(),
+                employees.get(1).getPerson(),
+                employees.get(4).getPerson()
+        )));
+    }
+
+    /**
+     * Преобразовать список сотрудников в отображение [компания -> множество людей, когда-либо работавших в этой компании].
+     * <p>
+     * Входные данные:
+     * [
+     * {
+     * {Иван Мельников 30},
+     * [
+     * {2, dev, "EPAM"},
+     * {1, dev, "google"}
+     * ]
+     * },
+     * {
+     * {Александр Дементьев 28},
+     * [
+     * {2, tester, "EPAM"},
+     * {1, dev, "EPAM"},
+     * {1, dev, "google"}
+     * ]
+     * },
+     * {
+     * {Дмитрий Осинов 40},
+     * [
+     * {3, QA, "yandex"},
+     * {1, QA, "EPAM"},
+     * {1, dev, "mail.ru"}
+     * ]
+     * },
+     * {
+     * {Анна Светличная 21},
+     * [
+     * {1, tester, "T-Systems"}
+     * ]
+     * }
+     * ]
+     * <p>
+     * Выходные данные:
+     * [
+     * "EPAM" -> [
+     * {Иван Мельников 30},
+     * {Александр Дементьев 28},
+     * {Дмитрий Осинов 40}
+     * ],
+     * "google" -> [
+     * {Иван Мельников 30},
+     * {Александр Дементьев 28}
+     * ],
+     * "yandex" -> [ {Дмитрий Осинов 40} ]
+     * "mail.ru" -> [ {Дмитрий Осинов 40} ]
+     * "T-Systems" -> [ {Анна Светличная 21} ]
      * ]
      */
     @Test
     void employersStuffList() {
         List<Employee> employees = getEmployees();
 
-        Map<String, Set<Person>> result = null;
+        Map<String, Set<Person>> result = employees.stream()
+                .map(employee -> {
+                    List<Employee> mapped = new ArrayList<>();
+                    employee.getJobHistory().forEach(job -> mapped.add(new Employee(employee.getPerson(), Collections.singletonList(job))));
+                    return mapped;
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(emp -> emp.getJobHistory().get(0).getEmployer(), Collectors.mapping(Employee::getPerson, Collectors.toSet())));
 
         assertThat(result, hasEntry((is("yandex")), contains(employees.get(2).getPerson())));
         assertThat(result, hasEntry((is("mail.ru")), contains(employees.get(2).getPerson())));
@@ -91,69 +159,6 @@ class Exercise2 {
     }
 
     /**
-     * Преобразовать список сотрудников в отображение [компания -> множество людей, начавших свою карьеру в этой компании].
-     *
-     * Пример.
-     *
-     * Входные данные:
-     * [
-     *     {
-     *         {Иван Мельников 30},
-     *         [
-     *             {2, dev, "EPAM"},
-     *             {1, dev, "google"}
-     *         ]
-     *     },
-     *     {
-     *         {Александр Дементьев 28},
-     *         [
-     *             {2, tester, "EPAM"},
-     *             {1, dev, "EPAM"},
-     *             {1, dev, "google"}
-     *         ]
-     *     },
-     *     {
-     *         {Дмитрий Осинов 40},
-     *         [
-     *             {3, QA, "yandex"},
-     *             {1, QA, "EPAM"},
-     *             {1, dev, "mail.ru"}
-     *         ]
-     *     },
-     *     {
-     *         {Анна Светличная 21},
-     *         [
-     *             {1, tester, "T-Systems"}
-     *         ]
-     *     }
-     * ]
-     *
-     * Выходные данные:
-     * [
-     *    "EPAM" -> [
-     *       {Иван Мельников 30},
-     *       {Александр Дементьев 28}
-     *    ],
-     *    "yandex" -> [ {Дмитрий Осинов 40} ]
-     *    "T-Systems" -> [ {Анна Светличная 21} ]
-     * ]
-     */
-    @Test
-    void indexByFirstEmployer() {
-        List<Employee> employees = getEmployees();
-
-        Map<String, Set<Person>> result = null;
-
-        assertThat(result, hasEntry(is("yandex"), contains(employees.get(2).getPerson())));
-        assertThat(result, hasEntry(is("T-Systems"), containsInAnyOrder(employees.get(3).getPerson(), employees.get(5).getPerson())));
-        assertThat(result, hasEntry(is("EPAM"), containsInAnyOrder(
-                employees.get(0).getPerson(),
-                employees.get(1).getPerson(),
-                employees.get(4).getPerson()
-        )));
-    }
-
-    /**
      * Преобразовать список сотрудников в отображение [компания -> сотрудник, суммарно проработавший в ней наибольшее время].
      * Гарантируется, что такой сотрудник будет один.
      */
@@ -161,7 +166,23 @@ class Exercise2 {
     void greatestExperiencePerEmployer() {
         List<Employee> employees = getEmployees();
 
-        Map<String, Person> collect = null;
+        Map<String, Person> collect = employees.stream()
+                .map(employee -> {
+                    Map<String, Integer> mapped = employee.getJobHistory().stream()
+                            .collect(Collectors.groupingBy(
+                                    JobHistoryEntry::getEmployer,
+                                    Collectors.summingInt(JobHistoryEntry::getDuration)
+                            ));
+                    List<Employee> employeeJobs = new ArrayList<>();
+                    mapped.forEach((key, value) -> employeeJobs.add(new Employee(employee.getPerson(), Collections.singletonList(new JobHistoryEntry(value, "", key)))));
+                    return employeeJobs;
+                })
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(employee -> employee.getJobHistory().get(0).getEmployer(),
+                        Collectors.collectingAndThen(
+                                Collectors.reducing((Employee e1, Employee e2) -> e1.getJobHistory().get(0).getDuration() > e2.getJobHistory().get(0).getDuration() ? e1 : e2),
+                                opt -> opt.get().getPerson()
+                        )));
 
         assertThat(collect, hasEntry("EPAM", employees.get(4).getPerson()));
         assertThat(collect, hasEntry("google", employees.get(1).getPerson()));
